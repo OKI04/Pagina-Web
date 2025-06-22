@@ -1,11 +1,3 @@
-// Lista de productos de ejemplo (debes definirla o importarla)
-const productos = [
-  // Ejemplo: { nombre: 'Producto 1', imagen: 'img1.jpg', precio: 100 }
-];
-
-// Función para cargar productos en el carrusel (debes definirla)
-// Cargar productos en el carrusel
-
 // Mostrar/ocultar categorías
 function toggleCategorias() {
   const elContenedor = document.getElementById('categorias');
@@ -19,6 +11,10 @@ function toggleCategorias() {
 // Llenar opciones en un select
 function llenarSelect(id, opciones) {
   const select = document.getElementById(id);
+  if (!select) {
+    console.error(`No se encontró el select con ID "${id}"`);
+    return;
+  }
   select.innerHTML = "";
   opciones.forEach(opcion => {
     const opt = document.createElement("option");
@@ -48,6 +44,8 @@ function iniciarModalLogin() {
         loginModal.style.display = 'none';
       }
     });
+  } else {
+    console.warn("No se encontró uno o más elementos del modal.");
   }
 }
 
@@ -56,6 +54,11 @@ function iniciarScrollCategorias() {
   const scrollContainer = document.querySelector('.categorias');
   const leftArrow = document.querySelector('.flecha-izquierda');
   const rightArrow = document.querySelector('.flecha-derecha');
+
+  if (!scrollContainer || !leftArrow || !rightArrow) {
+    console.warn("Faltan elementos para el scroll de categorías.");
+    return;
+  }
 
   function actualizarVisibilidadFlechas() {
     const scrollWidth = scrollContainer.scrollWidth;
@@ -84,8 +87,9 @@ function iniciarScrollCategorias() {
 
 // Inicializar todo al cargar el DOM
 document.addEventListener('DOMContentLoaded', () => {
-  cargarCarrusel(productos);
-  iniciarCarrusel();
   iniciarModalLogin();
   iniciarScrollCategorias();
+
+  // Ejemplo de cómo llenar un select (descomenta si tienes un select con ese ID)
+  // llenarSelect('miSelect', ['Opción 1', 'Opción 2', 'Opción 3']);
 });

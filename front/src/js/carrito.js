@@ -1,5 +1,5 @@
 // -----------------------------
-// DETECTAR CLIC FUERA DE LOS MODALES (Error, Producto, Confirmación, Carrito)
+// DETECTAR CLIC FUERA DE LOS MODALES
 // -----------------------------
 window.addEventListener("click", function(event) {
   const modalError = document.getElementById("modalError");
@@ -7,21 +7,10 @@ window.addEventListener("click", function(event) {
   const modalProducto = document.getElementById('modalProducto');
   const modalCarrito = document.getElementById("modalCarrito");
 
-  if (event.target === modalError) {
-    modalError.style.display = "none";
-  }
-
-  if (event.target === modalConfirmacion) {
-    cerrarModal();
-  }
-
-  if (event.target === modalProducto) {
-    modalProducto.style.display = 'none';
-  }
-
-  if (event.target === modalCarrito) {
-    modalCarrito.style.display = "none";
-  }
+  if (event.target === modalError) modalError.style.display = "none";
+  if (event.target === modalConfirmacion) cerrarModal();
+  if (event.target === modalProducto) modalProducto.style.display = 'none';
+  if (event.target === modalCarrito) modalCarrito.style.display = "none";
 });
 
 // -----------------------------
@@ -29,10 +18,9 @@ window.addEventListener("click", function(event) {
 // -----------------------------
 function toggleCarrito() {
   const modal = document.getElementById("modalCarrito");
-  modal.classList.toggle("show"); // Alterna la clase 'show' para mostrar u ocultar el modal
-  renderCarrito(); // Renderiza el contenido del carrito al mostrarlo
+  modal.classList.toggle("show");
+  renderCarrito();
 }
-
 
 // -----------------------------
 // ARREGLO PARA GUARDAR PRODUCTOS EN EL CARRITO
@@ -120,14 +108,10 @@ function AgregarCarro() {
 }
 
 // -----------------------------
-// FUNCIÓN PARA CERRAR MODAL DE CONFIRMACIÓN
-// -----------------------------
 function cerrarModal() {
   document.getElementById('modalConfirmacion').style.display = 'none';
 }
 
-// -----------------------------
-// FUNCIÓN PARA ELIMINAR UN PRODUCTO DEL CARRITO
 // -----------------------------
 function eliminarItem(index) {
   carrito.splice(index, 1);
@@ -135,8 +119,6 @@ function eliminarItem(index) {
   actualizarContadorCarrito();
 }
 
-// -----------------------------
-// FUNCIÓN PARA RENDERIZAR EL CARRITO
 // -----------------------------
 function renderCarrito() {
   const cartItems = document.getElementById("cart-items");
@@ -167,8 +149,6 @@ function renderCarrito() {
 }
 
 // -----------------------------
-// FUNCIÓN PARA ACTUALIZAR CONTADOR DEL CARRITO
-// -----------------------------
 function actualizarContadorCarrito() {
   const contador = document.getElementById("cart-count");
   contador.textContent = carrito.length;
@@ -176,22 +156,21 @@ function actualizarContadorCarrito() {
 }
 
 // -----------------------------
-// BOTÓN DE CIERRE CARRITO
-// -----------------------------
 const modalCarrito = document.getElementById("modalCarrito");
 const btnCerrarCarrito = document.getElementById("btnCerrarCarrito");
 btnCerrarCarrito.onclick = () => modalCarrito.style.display = "none";
 
 // -----------------------------
-// ABRIR CARRITO DESDE BOTÓN
-// -----------------------------
 document.getElementById("btnAgregarCarrito").addEventListener("click", () => {
   const nombre = document.getElementById("modal-nombre").textContent;
   const precio = parseInt(document.getElementById("modal-precio").textContent.replace(/[^\d]/g, ''));
   const cantidad = parseInt(document.getElementById("cantidad").textContent);
-  
+
   let imagenUrl = "";
   let codigo = "";
+
+  const colorSeleccionado = document.querySelector('.color-option.selected');
+  const estampadoSeleccionado = document.querySelector('.estampado-option.selected');
 
   if (colorSeleccionado) {
     imagenUrl = colorSeleccionado.imagenes?.[0]?.publicUrl || "";
@@ -213,8 +192,6 @@ document.getElementById("btnAgregarCarrito").addEventListener("click", () => {
 });
 
 // -----------------------------
-// MODAL DE ERROR
-// -----------------------------
 function mostrarErrorModal(mensaje) {
   const modalError = document.getElementById("modalError");
   const mensajeElemento = document.getElementById("modalErrorMensaje");
@@ -230,9 +207,6 @@ function cerrarModalError() {
 document.getElementById("btnCerrarError").addEventListener("click", cerrarModalError);
 
 // -----------------------------
-// MODAL DE COTIZACION
-// -----------------------------
-// Mostrar el modal
 function Contizacion() {
   const modal = document.getElementById("modalCotizacion");
   const lista = modal.querySelector(".product-list");
@@ -269,7 +243,7 @@ function Contizacion() {
     });
   }
 
-  actualizarTotalPagar(); // <--- aquí se actualiza el total
+  actualizarTotalPagar();
   modal.style.display = "block";
 }
 
@@ -281,12 +255,10 @@ function actualizarTotalPagar() {
 function eliminarProductoCotizacion(index) {
   carrito.splice(index, 1);
   renderCarrito();
-  Contizacion(); // Vuelve a renderizar el modal actualizado
-  actualizarContadorCarrito(); // Opcional: actualiza el contador del ícono del carrito
+  Contizacion();
+  actualizarContadorCarrito();
 }
 
-
-// Cerrar el modal y limpiar el formulario
 function cerrarCotizacion() {
   const modal = document.getElementById("modalCotizacion");
   if (modal) {
@@ -295,26 +267,19 @@ function cerrarCotizacion() {
   }
 }
 
-// Limpiar el formulario dentro del modal
 function limpiarFormularioCotizacion() {
   const form = document.querySelector("#modalCotizacion .quote-form");
-  if (form) {
-    form.reset();
-  }
+  if (form) form.reset();
 }
 
-// Eliminar un producto de la lista al hacer clic en la X
 document.addEventListener("click", function (event) {
   if (event.target.classList.contains("remove-button")) {
     const item = event.target.closest(".product-item");
-    if (item) {
-      item.remove();
-    }
+    if (item) item.remove();
   }
 });
 
-
-//Enviar cotizacion a WhatsApp
+// -----------------------------
 function enviarCotizacion() {
   if (carrito.length === 0) {
     alert("El carrito está vacío. Agrega productos antes de enviar la cotización.");
@@ -352,15 +317,24 @@ function enviarCotizacion() {
   mensaje += `\n💰 *Total a pagar:* $${total.toLocaleString("es-CO")}`;
 
   const mensajeCodificado = encodeURIComponent(mensaje);
-  const numero = "573227534241"; // Número de WhatsApp
-
+  const numero = "573227534241";
   const url = `https://wa.me/${numero}?text=${mensajeCodificado}`;
   window.open(url, "_blank");
 
-  // 👉 Limpiar carrito y actualizar la UI:
   carrito = [];
   renderCarrito();
   actualizarContadorCarrito();
   cerrarCotizacion();
 }
 
+// -----------------------------
+// Exportar funciones al scope global
+// -----------------------------
+window.AgregarCarro = AgregarCarro;
+window.cerrarModal = cerrarModal;
+window.eliminarItem = eliminarItem;
+window.Contizacion = Contizacion;
+window.cerrarCotizacion = cerrarCotizacion;
+window.enviarCotizacion = enviarCotizacion;
+window.cerrarModalError = cerrarModalError;
+window.eliminarProductoCotizacion = eliminarProductoCotizacion;

@@ -6,7 +6,7 @@ let carrusel = [];
 
 async function loadProducts() {
   try {
-    const res = await fetch('${baseApiUrl}/admin/products/all', {
+    const res = await fetch('/admin/products/all', {
       method: 'GET',
       credentials: 'include'
     });
@@ -18,6 +18,7 @@ async function loadProducts() {
     }
 
   const baseApiUrl = import.meta.env.VITE_BACKEND_URL;
+
     const productos = await res.json();
 
     productosCargados = productos.map(prod => {
@@ -88,7 +89,7 @@ async function loadProducts() {
 async function loadCarrusel() {
   try {
     
-    const res = await fetch('${baseApiUrl}/admin/carrusel/products/carrusel', {
+    const res = await fetch('/admin/carrusel/products/carrusel', {
       method: 'GET',
       credentials: 'include'
     });

@@ -50,64 +50,72 @@
       </div>
     </div>
   </header>
-
-  <!-- ==================== MODAL DEL CARRITO DE COMPRAS ==================== -->
-  <div class="modal-carrito" id="modalCarrito">
-    <div class="modal-header">
-      <h2>MI BOLSA</h2>
-      <span class="close" onclick="toggleCarrito()">×</span>
-    </div>
-    <div class="modal-content">
-      <div id="cart-items"></div> <!-- Aquí se cargarán los productos del carrito -->
-      <div class="footer-carrito">
-        <div class="total" id="cart-total">
-          <p>Total a pagar: $<span id="total-pago">0</span></p>
-        </div>
-        <div class="acciones-carrito">
+<!-- ==================== MODAL DEL CARRITO DE COMPRAS ==================== -->
+<div class="modal-carrito" id="modalCarrito">
+  <div class="modal-header">
+    <h2>MI BOLSA</h2>
+    <span class="close" onclick="toggleCarrito()">×</span>
+  </div>
+  <div class="modal-content">
+    <div id="cart-items"></div> <!-- Aquí se cargarán los productos del carrito -->
+    <div class="footer-carrito">
+      <div class="total" id="cart-total">
+        <p>Total a pagar: $<span id="total-pago">0</span></p>
+      </div>
+      <div class="acciones-carrito">
         <button class="btn-cotizar" onclick="Contizacion()">Enviar cotización</button>
-        </div>
       </div>
     </div>
   </div>
+</div>
 
- 
-  <!-- ====================MODAL DE COTIZACIÓN  ==================== -->
-  <div id="modalCotizacion">
-    <div class="modal-container">
-      <button class="close-modal-btn" onclick="cerrarCotizacion()" aria-label="Cerrar">&times;</button>
-        <h2>Resumen de cotización</h2>
-      <ul class="product-list">
-        <li class="product-item">
-          <div class="product-info">
-            <span class="product-info-main"><b>Información</b> del producto</span>
-            <span class="product-subtitle">(Una sola fila)</span>
-          </div>
-          <button class="remove-button" aria-label="Eliminar producto">X</button>
-        </li>
-      </ul>
-     <div class="total" id="cart-total">
-          <p>Total a pagar: $<span id="total-pagoFinal">0</span></p>
-      </div>
-        <h3>DATOS PARA FINALIZAR LA COTIZACIÓN</h3>
-      <form class="quote-form" action="#" method="post" onsubmit="event.preventDefault(); alert('Formulario Enviado!'); cerrarCotizacion();">
-        <div class="form-grid">
-          <div class="form-group"><label for="nombre">Nombre</label><input type="text" id="nombre" name="nombre"></div>
-          <div class="form-group"><label for="empresa">Empresa</label><input type="text" id="empresa" name="empresa"></div>
-          <div class="form-group"><label for="direccion">Dirección</label><input type="text" id="direccion" name="direccion"></div>
-          <div class="form-group"><label for="telefono">Teléfono</label><input type="text" id="telefono" name="telefono"></div>
-          <div class="form-group form-group-full"><label for="correo">Correo</label><input type="email" id="correo" name="correo"></div>
-        </div>
-        <div class="whatsapp-container">
-          <a href="#" id="btnEnviarCotizacion" class="whatsapp-link" onclick="enviarCotizacion()">
-            <img src="src/Imagen_De_Apoyo/Icono_WhatsApp.png" alt="Enviar por WhatsApp" class="whatsapp-icon">
-            <span class="whatsapp-text">Enviar</span>
-          </a>
-        </div>
-
-      </form>
+<!-- ==================== MODAL DE COTIZACIÓN ==================== -->
+<div id="modalCotizacion">
+  <div class="modal-container">
+    <button class="close-modal-btn" onclick="cerrarCotizacion()" aria-label="Cerrar">&times;</button>
+    <h2>Resumen de cotización</h2>
+    <ul class="product-list" id="resumen-cotizacion">
+      <!-- Aquí se mostrarán los productos seleccionados -->
+    </ul>
+    <div class="total" id="cart-total-final">
+      <p>Total a pagar: $<span id="total-pagoFinal">0</span></p>
     </div>
+
+    <h3>DATOS PARA FINALIZAR LA COTIZACIÓN</h3>
+    <form class="quote-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="nombre">
+        </div>
+        <div class="form-group">
+          <label for="empresa">Empresa</label>
+          <input type="text" id="empresa" name="empresa">
+        </div>
+        <div class="form-group">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" name="direccion">
+        </div>
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input type="text" id="telefono" name="telefono">
+        </div>
+        <div class="form-group form-group-full">
+          <label for="correo">Correo</label>
+          <input type="email" id="correo" name="correo">
+        </div>
+      </div>
+      <div class="whatsapp-container">
+        <a href="#" id="btnEnviarCotizacion" class="whatsapp-link" onclick="enviarCotizacion()">
+          <img src="src/Imagen_De_Apoyo/Icono_WhatsApp.png" alt="Enviar por WhatsApp" class="whatsapp-icon">
+          <span class="whatsapp-text">Enviar</span>
+        </a>
+      </div>
+    </form>
   </div>
-   
+</div>
+
+
 
 
   <!-- ==================== MODAL DE INICIO DE SESIÓN ==================== -->
@@ -275,11 +283,7 @@
 <script type="module" src="src/js/getProducts.js"></script> <!-- Carga y renderizado de productos -->
 <script type="module" src="src/js/carrito.js"></script> <!-- Funcionalidad del carrito de compras -->
 <script type="module" src="src/js/comprarProducto.js"></script> <!-- Funcionalidad del modal de compra -->
-
 <!-- Librerías externas sin módulo (se mantienen igual) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-
 </body>
-
 </html>
