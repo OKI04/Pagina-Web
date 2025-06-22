@@ -42,7 +42,7 @@ window.loadProducts = async function loadProducts() {
       return;
     }
 
-    const baseApiUrl = "http://localhost:3900";
+const baseApiUrl = import.meta.env.VITE_BACKEND_URL;
     const productos = await res.json();
 
     productosCargados = productos.map(prod => {
