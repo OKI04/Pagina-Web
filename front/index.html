@@ -276,7 +276,9 @@
   </div>
 
 <!-- ==================== INCLUSIÓN DE ARCHIVOS JAVASCRIPT ==================== -->
-<script type="module" src="/src/js/script.js"></script> <!-- Scripts generales -->
+<script>
+  window.BACKEND_URL = "http://localhost:3900"; // o la URL real de tu backend
+</script><script type="module" src="/src/js/script.js"></script> <!-- Scripts generales -->
 <script type="module" src="/src/js/login.js"></script> <!-- Lógica del login -->
 <script type="module" src="/src/js/getProducts.js"></script> <!-- Carga y renderizado de productos -->
 <script type="module" src="/src/js/carrito.js"></script> <!-- Funcionalidad del carrito de compras -->

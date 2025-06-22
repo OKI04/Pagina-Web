@@ -220,3 +220,11 @@
   border-radius: 50%;
   padding: 2px; /* para que el borde no achique la imagen */
 }
+.producto {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  display: inline-block;
+  text-align: center;
+}
