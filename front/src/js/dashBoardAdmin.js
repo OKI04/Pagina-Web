@@ -12,7 +12,7 @@ userForm?.addEventListener('submit', async (e) => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch('/admin/register', {
+  const res = await fetch('${baseApiUrl}/admin/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ nombre, email, password })
@@ -31,7 +31,7 @@ userForm?.addEventListener('submit', async (e) => {
 
 window.loadProducts = async function loadProducts() {
   try {
-    const res = await fetch('/admin/products/all', {
+    const res = await fetch('${baseApiUrl}/admin/products/all', {
       method: 'GET',
       credentials: 'include'
     });
@@ -234,7 +234,7 @@ document.getElementById("createProductForm").addEventListener("submit", async e 
   });
 
   try {
-        const res = await fetch('/admin/products/create', {
+        const res = await fetch('${baseApiUrl}/admin/products/create', {
           method: 'POST',
           body: formData,
           credentials: 'include'       //si usas cookie HttpOnly
@@ -293,7 +293,7 @@ async function eliminar(_id) {
   console.log("Id url: " + _id);
    try {
     
-     const res = await fetch(`/admin/products/delete/${_id}`, {
+     const res = await fetch(`${baseApiUrl}/admin/products/delete/${_id}`, {
        method: 'DELETE',
        credentials: 'include'    // si usas cookie HttpOnly
      });
@@ -456,7 +456,7 @@ function openEditModal(productId) {
   document.getElementById('editPrintsContainer').innerHTML = '';
   
   // Obtener datos del producto
-  fetch(`/admin/products/one/${productId}`, {
+  fetch(`${baseApiUrl}/admin/products/one/${productId}`, {
     credentials: 'include'
   })
   .then(response => response.json())
@@ -565,7 +565,7 @@ document.getElementById('submitEditForm').addEventListener('click', function() {
 
   console.log(productId);
   
-  fetch(`/admin/products/update/${productId}`, {
+  fetch(`${baseApiUrl}/admin/products/update/${productId}`, {
     method: 'PUT',
     body: formData,
     credentials: 'include'
@@ -706,7 +706,7 @@ document.getElementById('submitEditForm').addEventListener('click', function() {
     }
   });
   
-  fetch(`/admin/products/update/${productId}`, {
+  fetch(`${baseApiUrl}/admin/products/update/${productId}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
