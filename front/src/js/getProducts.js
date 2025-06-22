@@ -1,12 +1,20 @@
+// === VARIABLES GLOBALES ===
 const bodyProduct = document.querySelector(".main-products");
 const tituloProductos = document.querySelector("#producto h2");
-
 let productosCargados = [];
 let carrusel = [];
 
+// === CARGAR PRODUCTOS ===
 async function loadProducts() {
   try {
-    const res = await fetch('/admin/products/all', {
+    const baseApiUrl = import.meta.env.VITE_BACKEND_URL;
+    if (!baseApiUrl) {
+      console.error("VITE_BACKEND_URL no definida");
+      alert("Error: URL del backend no configurada");
+      return;
+    }
+
+    const res = await fetch(`${baseApiUrl}/admin/products/all`, {
       method: 'GET',
       credentials: 'include'
     });
@@ -17,52 +25,21 @@ async function loadProducts() {
       return;
     }
 
-    const baseApiUrl = import.meta.env.VITE_BACKEND_URL;
     const productos = await res.json();
 
     productosCargados = productos.map(prod => {
-      const imagenesNorm = (prod.imagenes || []).map(img => {
-        const rutaLimpia = img.url.replace(/\\/g, "/");
-        return {
-          ...img,
-          url: rutaLimpia,
-          publicUrl: `${baseApiUrl}/${rutaLimpia}`
-        };
-      });
+      const imagenesNorm = (prod.imagenes || []).map(img => normalizarImagen(img, baseApiUrl));
+      const coloresNorm = (prod.colores || []).map(color => ({
+        ...color,
+        imagenes: (color.imagenes || []).map(img => normalizarImagen(img, baseApiUrl)),
+        publicUrl: color.imagenes?.[0]?.url ? `${baseApiUrl}/${color.imagenes[0].url.replace(/\\/g, "/")}` : ''
+      }));
 
-      const coloresNorm = (prod.colores || []).map(color => {
-        const imagenesColor = (color.imagenes || []).map(img => {
-          const rutaLimpia = img.url.replace(/\\/g, "/");
-          return {
-            ...img,
-            url: rutaLimpia,
-            publicUrl: `${baseApiUrl}/${rutaLimpia}`
-          };
-        });
-
-        return {
-          ...color,
-          imagenes: imagenesColor,
-          publicUrl: imagenesColor[0]?.publicUrl || ''
-        };
-      });
-
-      const estampadosNorm = (prod.estampados || []).map(estampado => {
-        const imagenesEst = (estampado.imagenes || []).map(img => {
-          const rutaLimpia = img.url.replace(/\\/g, "/");
-          return {
-            ...img,
-            url: rutaLimpia,
-            publicUrl: `${baseApiUrl}/${rutaLimpia}`
-          };
-        });
-
-        return {
-          ...estampado,
-          imagenes: imagenesEst,
-          publicUrl: imagenesEst[0]?.publicUrl || ''
-        };
-      });
+      const estampadosNorm = (prod.estampados || []).map(estampado => ({
+        ...estampado,
+        imagenes: (estampado.imagenes || []).map(img => normalizarImagen(img, baseApiUrl)),
+        publicUrl: estampado.imagenes?.[0]?.url ? `${baseApiUrl}/${estampado.imagenes[0].url.replace(/\\/g, "/")}` : ''
+      }));
 
       return {
         ...prod,
@@ -72,8 +49,7 @@ async function loadProducts() {
       };
     });
 
-    const loader = document.querySelector('.spanLoader');
-    if (loader) loader.remove();
+    document.querySelector('.spanLoader')?.remove();
 
     renderProductos(productosCargados);
     loadCarrusel();
@@ -84,6 +60,16 @@ async function loadProducts() {
   }
 }
 
+function normalizarImagen(img, baseApiUrl) {
+  const rutaLimpia = img.url.replace(/\\/g, "/");
+  return {
+    ...img,
+    url: rutaLimpia,
+    publicUrl: `${baseApiUrl}/${rutaLimpia}`
+  };
+}
+
+// === CARRUSEL ===
 async function loadCarrusel() {
   try {
     const res = await fetch('/admin/carrusel/products/carrusel', {
@@ -93,13 +79,12 @@ async function loadCarrusel() {
 
     if (!res.ok) {
       const err = await res.text();
-      alert('Error al cargar productos: ' + err);
+      alert('Error al cargar carrusel: ' + err);
       return;
     }
 
     const data = await res.json();
     const productos = data.carruselItems[0].productos;
-
     carrusel = filtrarCarrusel(productosCargados, productos);
     insertarEnCarrusel(carrusel, productos);
 
@@ -109,74 +94,83 @@ async function loadCarrusel() {
   }
 }
 
-function renderProductos(productos) {
-  bodyProduct.innerHTML = productos.map((p, index) => {
-    const primerColor = p.colores?.[0];
-    const primerEstampado = p.estampados?.[0];
-    const imagenesGenerales = p.imagenes || [];
+function filtrarCarrusel(base, filtro) {
+  const referencias = filtro.map(p => p.referencia);
+  return base.filter(p => referencias.includes(p.referencia));
+}
 
-    let imagenesColor = [];
-    if (primerColor?.imagenes?.length > 0) {
-      imagenesColor = primerColor.imagenes;
-    } else if (primerEstampado?.imagenes?.length > 0) {
-      imagenesColor = primerEstampado.imagenes;
+function insertarEnCarrusel(productos, res) {
+  const carouselTrack = document.querySelector(".carousel-track");
+  carouselTrack.innerHTML = "";
+
+  productos.forEach(producto => {
+    let imagen = obtenerImagenCarrusel(producto, res);
+    const card = document.createElement("div");
+    card.className = "carousel-item";
+    card.innerHTML = `
+      <img src="${imagen}" alt="${producto.nombre}" data-id="${producto.referencia}" onclick='AbrirProductoComprarDesdeCarrusel(${JSON.stringify(producto)})'>
+    `;
+    carouselTrack.appendChild(card);
+    carouselTrack.appendChild(card.cloneNode(true));
+  });
+
+  startAutoScroll(productos.length);
+}
+
+function obtenerImagenCarrusel(producto, res) {
+  for (const item of res) {
+    if (item.referencia === producto.referencia) {
+      const fuente = item.tipo === 'colores' ? producto.colores : producto.estampados;
+      const match = fuente.find(e => e.codigo === item.codigo);
+      return match?.imagenes?.[1]?.publicUrl || '';
     }
+  }
+  return '';
+}
 
-    let imagenPrincipal = imagenesColor[1]?.publicUrl || imagenesColor[0]?.publicUrl || imagenesGenerales[0]?.publicUrl || '';
-    let imagenesRotacion = imagenesColor.length > 1
-      ? imagenesColor.slice(1).map(img => img.publicUrl)
-      : imagenesGenerales.slice(1).map(img => img.publicUrl);
+function startAutoScroll(count) {
+  const track = document.querySelector(".carousel-track");
+  const item = document.querySelector(".carousel-item");
+  if (!item) return;
+
+  const itemWidth = item.offsetWidth;
+  const spacing = parseInt(getComputedStyle(item).marginRight || 0);
+  const loopWidth = (itemWidth + spacing) * count;
+
+  let offset = 0;
+  function step() {
+    offset = (offset + 3.5) % loopWidth;
+    track.style.transform = `translateX(-${offset}px)`;
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// === RENDER PRODUCTOS ===
+function renderProductos(productos) {
+  bodyProduct.innerHTML = productos.map((p, i) => {
+    const color = p.colores?.[0];
+    const estampado = p.estampados?.[0];
+    const generales = p.imagenes || [];
+    let imagenes = color?.imagenes.length ? color.imagenes : estampado?.imagenes.length ? estampado.imagenes : generales;
+    const principal = imagenes[1]?.publicUrl || imagenes[0]?.publicUrl || '';
+    const rotacion = imagenes.slice(1).map(img => img.publicUrl);
 
     return `
       <div class="product-container">
         <div class="product-card">
           <div class="product-image">
-            <img 
-              src="${imagenPrincipal}" 
-              alt="Vista" 
-              class="main-image" 
-              id="mainImage-${index}" 
-              data-index="${index}" 
-              data-rotacionactiva='${JSON.stringify(imagenesRotacion)}'
-            />
+            <img src="${principal}" alt="Vista" class="main-image" id="mainImage-${i}" data-index="${i}" data-rotacionactiva='${JSON.stringify(rotacion)}'>
             <button class="quick-buy" onclick="AbrirProductoComprar('${p.referencia}')">COMPRAR</button>
           </div>
           <div class="product-info">
-            <div class="product-name">${p.nombre}</div> 
-            <div class="product-colors">
-              ${p.colores?.length > 0 ? `
-                <div class="lista-colores">
-                  <div class="colores-container">
-                    ${p.colores.map((color, i) => `
-                      <div class="color-item ${i === 0 ? 'selected' : ''}">
-                        <img src="${color.publicUrl}" class="color-imagen">   
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              ` : ''}
-            </div>
-            <div class="product-colors">
-              ${p.estampados?.length > 0 ? `
-                <div class="lista-colores">
-                  <div class="colores-container">
-                    ${p.estampados.map((estampado, i) => `
-                      <div class="estampado-item ${(p.colores?.length === 0 && i === 0) ? 'selected' : ''}">
-                        <img src="${estampado.publicUrl}" class="estampado-imagen color-imagen">
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              ` : ''}
-            </div>
+            <div class="product-name">${p.nombre}</div>
+            ${renderColores(p)}
+            ${renderEstampados(p)}
             <div class="product-sizes">
-              ${Object.entries(p.tallas || {})
-                .filter(([_, cantidad]) => cantidad > 0)
-                .map(([talla]) => `<span class="size-box">${talla}</span>`).join('') || '<span class="size-box">No disponibles</span>'}
+              ${Object.entries(p.tallas || {}).filter(([_, c]) => c > 0).map(([t]) => `<span class="size-box">${t}</span>`).join('') || '<span class="size-box">No disponibles</span>'}
             </div>
-            <div class="product-price">
-              Precio mayorista: <span class="price-value">$${p.precio.toLocaleString('es-CO')}</span>
-            </div>
+            <div class="product-price">Precio mayorista: <span class="price-value">$${p.precio.toLocaleString('es-CO')}</span></div>
           </div>
         </div>
       </div>
@@ -188,32 +182,33 @@ function renderProductos(productos) {
   inicializarEstampadoClick();
 }
 
+function renderColores(p) {
+  if (!p.colores?.length) return '';
+  return `<div class="product-colors"><div class="lista-colores"><div class="colores-container">${p.colores.map((c, i) => `<div class="color-item ${i === 0 ? 'selected' : ''}"><img src="${c.publicUrl}" class="color-imagen"></div>`).join('')}</div></div></div>`;
+}
+
+function renderEstampados(p) {
+  if (!p.estampados?.length) return '';
+  return `<div class="product-colors"><div class="lista-colores"><div class="colores-container">${p.estampados.map((e, i) => `<div class="estampado-item ${(p.colores?.length === 0 && i === 0) ? 'selected' : ''}"><img src="${e.publicUrl}" class="estampado-imagen color-imagen"></div>`).join('')}</div></div></div>`;
+}
+
 function inicializarRotacion() {
   document.querySelectorAll('.main-image').forEach(img => {
-    const imagenesRotacion = JSON.parse(img.dataset.rotacionactiva || "[]");
-    if (imagenesRotacion.length === 0) return;
-
-    let intervalId = null;
-    let currentIndex = 0;
-
-    function startRotation() {
+    const rotacion = JSON.parse(img.dataset.rotacionactiva || "[]");
+    if (!rotacion.length) return;
+    let intervalId = null, currentIndex = 0;
+    img.addEventListener("mouseenter", () => {
       if (intervalId !== null) return;
-      currentIndex = 0;
       intervalId = setInterval(() => {
-        img.src = imagenesRotacion[currentIndex];
-        currentIndex = (currentIndex + 1) % imagenesRotacion.length;
+        img.src = rotacion[currentIndex];
+        currentIndex = (currentIndex + 1) % rotacion.length;
       }, 1000);
-    }
-
-    function stopRotation() {
+    });
+    img.addEventListener("mouseleave", () => {
       clearInterval(intervalId);
       intervalId = null;
-      currentIndex = 0;
-      img.src = imagenesRotacion[0];
-    }
-
-    img.addEventListener("mouseenter", startRotation);
-    img.addEventListener("mouseleave", stopRotation);
+      img.src = rotacion[0];
+    });
   });
 }
 
@@ -221,21 +216,19 @@ function inicializarColorClick() {
   document.querySelectorAll(".product-colors .color-imagen:not(.estampado-imagen)").forEach(colorImg => {
     colorImg.addEventListener("click", (e) => {
       const card = e.target.closest(".product-card");
-      card.querySelectorAll(".color-item, .estampado-item").forEach(item => item.classList.remove("selected"));
+      card.querySelectorAll(".color-item, .estampado-item").forEach(i => i.classList.remove("selected"));
       e.target.parentElement.classList.add("selected");
 
       const mainImg = card.querySelector(".main-image");
       const index = mainImg.dataset.index;
       const producto = productosCargados[index];
 
-      const srcRelativa = new URL(colorImg.src).pathname;
-      const colorSeleccionado = producto.colores.find(c => new URL(c.publicUrl, location.origin).pathname === srcRelativa);
+      const src = new URL(colorImg.src).pathname;
+      const colorSel = producto.colores.find(c => new URL(c.publicUrl, location.origin).pathname === src);
+      if (!colorSel || colorSel.imagenes.length < 2) return;
 
-      if (!colorSeleccionado || colorSeleccionado.imagenes.length < 2) return;
-
-      mainImg.src = colorSeleccionado.imagenes[1].publicUrl;
-      const imagenesRotacion = colorSeleccionado.imagenes.slice(2).map(img => img.publicUrl);
-      mainImg.dataset.rotacionactiva = JSON.stringify(imagenesRotacion);
+      mainImg.src = colorSel.imagenes[1].publicUrl;
+      mainImg.dataset.rotacionactiva = JSON.stringify(colorSel.imagenes.slice(2).map(img => img.publicUrl));
       inicializarRotacion();
     });
   });
@@ -245,126 +238,33 @@ function inicializarEstampadoClick() {
   document.querySelectorAll(".product-colors .estampado-imagen").forEach(estampadoImg => {
     estampadoImg.addEventListener("click", (e) => {
       const card = e.target.closest(".product-card");
-      card.querySelectorAll(".color-item, .estampado-item").forEach(item => item.classList.remove("selected"));
+      card.querySelectorAll(".color-item, .estampado-item").forEach(i => i.classList.remove("selected"));
       e.target.parentElement.classList.add("selected");
 
       const mainImg = card.querySelector(".main-image");
       const index = mainImg.dataset.index;
       const producto = productosCargados[index];
 
-      const srcRelativa = new URL(estampadoImg.src).pathname;
-      const estampadoSeleccionado = producto.estampados.find(e => new URL(e.publicUrl, location.origin).pathname === srcRelativa);
+      const src = new URL(estampadoImg.src).pathname;
+      const estampadoSel = producto.estampados.find(e => new URL(e.publicUrl, location.origin).pathname === src);
+      if (!estampadoSel || estampadoSel.imagenes.length < 2) return;
 
-      if (!estampadoSeleccionado || estampadoSeleccionado.imagenes.length < 2) return;
-
-      mainImg.src = estampadoSeleccionado.imagenes[1].publicUrl;
-      const imagenesRotacion = estampadoSeleccionado.imagenes.slice(2).map(img => img.publicUrl);
-      mainImg.dataset.rotacionactiva = JSON.stringify(imagenesRotacion);
+      mainImg.src = estampadoSel.imagenes[1].publicUrl;
+      mainImg.dataset.rotacionactiva = JSON.stringify(estampadoSel.imagenes.slice(2).map(img => img.publicUrl));
       inicializarRotacion();
     });
   });
 }
 
-// Carrusel
-const carouselTrack = document.querySelector(".carousel-track");
-let animationId;
-
-function filtrarCarrusel(arrayBase, arrayFiltro) {
-  const referenciasValidas = arrayFiltro.map(item => item.referencia);
-  return arrayBase.filter(item => referenciasValidas.includes(item.referencia));
-}
-
-function insertarEnCarrusel(carrusel, res) {
-  carouselTrack.innerHTML = "";
-  const allCards = [];
-
-  carrusel.forEach(producto => {
-    let imagenCarrusel = '';
-
-    for (let i = 0; i < res.length; i++) {
-      if (res[i].referencia === producto.referencia) {
-        if (res[i].tipo === 'colores') {
-          producto.colores.forEach(color => {
-            if (color.codigo === res[i].codigo) {
-              imagenCarrusel = color.imagenes[1].publicUrl;
-            }
-          });
-        } else {
-          producto.estampados.forEach(estampado => {
-            if (estampado.codigo === res[i].codigo) {
-              imagenCarrusel = estampado.imagenes[1].publicUrl;
-            }
-          });
-        }
-      }
-    }
-
-    const card = document.createElement("div");
-    card.className = "carousel-item";
-    card.innerHTML = `
-      <img 
-        src="${imagenCarrusel}" 
-        alt="${producto.nombre}" 
-        data-id="${producto.referencia}"
-        onclick='AbrirProductoComprarDesdeCarrusel(${JSON.stringify(producto)})'
-      >
-    `;
-    allCards.push(card);
-  });
-
-  allCards.forEach(card => carouselTrack.appendChild(card));
-  allCards.forEach(card => carouselTrack.appendChild(card.cloneNode(true)));
-
-  carouselTrack.style.transition = "none";
-  startAutoScroll(allCards.length);
-}
-
-function startAutoScroll(originalItemCount) {
-  cancelAnimationFrame(animationId);
-
-  const items = document.querySelectorAll(".carousel-item");
-  if (!items.length) return;
-
-  const itemWidth = items[0].offsetWidth;
-  const spacing = parseInt(getComputedStyle(items[0]).marginRight || 0);
-  const loopWidth = (itemWidth + spacing) * originalItemCount;
-
-  const speed = 3.5;
-  let offset = 0;
-
-  function step() {
-    offset += speed;
-    if (offset >= loopWidth) {
-      offset -= loopWidth;
-    }
-    carouselTrack.style.transform = `translateX(-${offset}px)`;
-    animationId = requestAnimationFrame(step);
-  }
-
-  animationId = requestAnimationFrame(step);
-}
-
-// Ejecutar al cargar el DOM
+// === INICIALIZACIÓN GENERAL ===
 document.addEventListener("DOMContentLoaded", () => {
   loadProducts();
-});
-
-/**
- * Carga productos y configura filtros por categoría
- */
-  document.addEventListener("DOMContentLoaded", () => {
-  loadProducts();
-
   const botonesCategoria = document.querySelectorAll(".btn-categoria");
-
-  botonesCategoria.forEach((boton) => {
-    boton.addEventListener("click", (e) => {
-      const categoriaSelect = e.target.dataset.categoria;
-
-      if (categoriaSelect !== "todos") {
-        const filtrados = productosCargados.filter(
-          (prod) => prod.categoria.toLowerCase() === categoriaSelect.toLowerCase()
-        );
+  botonesCategoria.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const categoria = e.target.dataset.categoria;
+      if (categoria !== "todos") {
+        const filtrados = productosCargados.filter(p => p.categoria.toLowerCase() === categoria.toLowerCase());
         renderProductos(filtrados);
         tituloProductos.textContent = e.target.textContent.trim().toUpperCase();
       } else {
