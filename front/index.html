@@ -63,16 +63,14 @@
 
       <button class="login-btn" type="submit">INICIAR</button>
     </form>
+          <!-- Mensaje de error en caso de credenciales inválidas -->
+      <div id="errorMsg" class="error" style="display: none; color: red;"></div>
 
   </div>
 </div>
-
-
-
-
         <!-- Botón del carrito con contador de productos -->
         <div class="cart-container">
-          <button class="comprar-button" onclick="toggleCarrito()">
+          <button class="comprar-button" id="abrirCarrito">
             <img src="src/Imagen_De_Apoyo/Carro.png" alt="Carrito de compras" />
             <span id="cart-count" class="cart-count">0</span>
           </button>
@@ -95,7 +93,7 @@
         <p>Total a pagar: $<span id="total-pago">0</span></p>
       </div>
       <div class="acciones-carrito">
-        <button class="btn-cotizar" id="btnCotizar">Enviar cotización</button>
+      <button id="btnCotizar" class="btn-cotizar">Enviar cotización</button>
       </div>
     </div>
   </div>
@@ -104,30 +102,21 @@
 <!-- ==================== MODAL DE COTIZACIÓN ==================== -->
 <div id="modalCotizacion" class="modal-cotizacion">
   <div class="modal-container">
-    <button class="close-modal-btn" id="btnCerrarCotizacion" aria-label="Cerrar">&times;</button>
-    
-    <h2>Resumen de cotización</h2>
+    <button class="close-modal-btn" id="btnCerrarCotizacion">&times;</button>
 
-    <ul class="product-list">
-      <li class="product-item">
-        <div class="product-info">
-          <span class="product-info-main"><b>Información</b> del producto</span>
-          <span class="product-subtitle">(Una sola fila)</span>
-        </div>
-        <button class="remove-button" aria-label="Eliminar producto">X</button>
-      </li>
-    </ul>
+    <h2>Resumen de cotización</h2>
+    <ul class="product-list"></ul>
 
     <div class="total">
       <p>Total a pagar: $<span id="total-pagoFinal">0</span></p>
     </div>
 
     <h3>DATOS PARA FINALIZAR LA COTIZACIÓN</h3>
-    <form class="quote-form" action="#" method="post" onsubmit="event.preventDefault(); alert('Formulario Enviado!');">
+    <form class="quote-form" action="#" method="post" onsubmit="event.preventDefault();">
       <div class="form-grid">
         <div class="form-group">
           <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" name="nombre">
+          <input type="text" id="nombre" name="nombre" required>
         </div>
         <div class="form-group">
           <label for="empresa">Empresa</label>
@@ -139,11 +128,11 @@
         </div>
         <div class="form-group">
           <label for="telefono">Teléfono</label>
-          <input type="text" id="telefono" name="telefono">
+          <input type="text" id="telefono" name="telefono" required>
         </div>
         <div class="form-group form-group-full">
           <label for="correo">Correo</label>
-          <input type="email" id="correo" name="correo">
+          <input type="email" id="correo" name="correo" required>
         </div>
       </div>
 
@@ -156,19 +145,6 @@
     </form>
   </div>
 </div>
-
-   
-
-
-
-
-      <!-- Mensaje de error en caso de credenciales inválidas -->
-      <div id="errorMsg" class="error" style="display: none; color: red;"></div>
-
-      <!-- Botón para cerrar el modal -->
-      <button class="close-modal" id="closeModalBtn">&times;</button>
-    </div>
-  </div>
 
   <!-- ==================== SECCIÓN DE PRODUCTOS MÁS VENDIDOS ==================== -->
 <section id="recomendados" class="recomendados">
@@ -264,29 +240,29 @@
               <button id="increment">+</button>
             </div>
 
-            <!-- Botón principal -->
-            <button class="btn-comprar" onclick="AgregarCarro()">AGREGAR AL CARRITO</button>
-          </div>
-          <button class="btn-vermas" id="btnOpenDescripcion" data-ref="REF001">VER DETALLES</button>
+           <!-- Botón principal -->
+<button class="btn-comprar" id="btnAgregarCarro">AGREGAR AL CARRITO</button>
+
+<!-- Ver detalles -->
+<button class="btn-vermas" id="btnOpenDescripcion" data-ref="REF001">VER DETALLES</button>
+
+      <!-- Confirmación de compra -->
+      <div id="modalConfirmacion" class="confirmacion-Comprar">
+        <div class="confirmacion-contenido">
+          <span id="btnCerrarConfirmacion">&times;</span>
+          <p>Producto agregado al carrito.</p>
+          <button class="btnSeguirComprando" id="btnSeguirComprando">SEGUIR COMPRANDO</button>
         </div>
       </div>
-    </div>
-   <!-- Confirmacion de compra de producto -->
-        <div id="modalConfirmacion" class="confirmacion-Comprar">
-          <div class="confirmacion-contenido">
-            <span id="btnCerrarConfirmacion" onclick="cerrarModal()">&times;</span>
-            <p>Producto agregado al carrito.</p>
-            <button class="btnSeguirComprando" onclick="cerrarModal()">SEGUIR COMPRANDO</button>
-          </div>
-        </div>
-    <!-- Modal de Error -->
+
+      <!-- Modal de Error -->
       <div id="modalError" class="modal-Error">
-  <div class="modal-content">
-    <p id="modalErrorMensaje"></p>
-      <button id="btnCerrarError" onclick="cerrarModalError()">Cerrar</button>
-    </div>
-  </div>
-</div>
+        <div class="modal-content">
+          <p id="modalErrorMensaje"></p>
+          <button id="btnCerrarError">Cerrar</button>
+        </div>
+      </div>
+      </div>
 
 
   <!-- ==================== MODAL DESCRIPCIÓN DETALLADA DEL PRODUCTO ==================== -->

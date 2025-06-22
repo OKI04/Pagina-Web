@@ -17,8 +17,7 @@ async function loadProducts() {
       return;
     }
 
-  const baseApiUrl = import.meta.env.VITE_BACKEND_URL;
-
+    const baseApiUrl = import.meta.env.VITE_BACKEND_URL;
     const productos = await res.json();
 
     productosCargados = productos.map(prod => {
@@ -73,7 +72,6 @@ async function loadProducts() {
       };
     });
 
-
     const loader = document.querySelector('.spanLoader');
     if (loader) loader.remove();
 
@@ -88,7 +86,6 @@ async function loadProducts() {
 
 async function loadCarrusel() {
   try {
-    
     const res = await fetch('/admin/carrusel/products/carrusel', {
       method: 'GET',
       credentials: 'include'
@@ -106,7 +103,6 @@ async function loadCarrusel() {
     carrusel = filtrarCarrusel(productosCargados, productos);
     insertarEnCarrusel(carrusel, productos);
 
-
   } catch (error) {
     console.error('Error en loadCarrusel:', error);
     alert('Error de conexión al cargar el carrusel');
@@ -120,14 +116,13 @@ function renderProductos(productos) {
     const imagenesGenerales = p.imagenes || [];
 
     let imagenesColor = [];
-    if (primerColor && primerColor.imagenes?.length > 0) {
+    if (primerColor?.imagenes?.length > 0) {
       imagenesColor = primerColor.imagenes;
-    } else if (primerEstampado && primerEstampado.imagenes?.length > 0) {
+    } else if (primerEstampado?.imagenes?.length > 0) {
       imagenesColor = primerEstampado.imagenes;
     }
 
     let imagenPrincipal = imagenesColor[1]?.publicUrl || imagenesColor[0]?.publicUrl || imagenesGenerales[0]?.publicUrl || '';
-
     let imagenesRotacion = imagenesColor.length > 1
       ? imagenesColor.slice(1).map(img => img.publicUrl)
       : imagenesGenerales.slice(1).map(img => img.publicUrl);
@@ -202,7 +197,7 @@ function inicializarRotacion() {
     let currentIndex = 0;
 
     function startRotation() {
-      if (intervalId !== null) return; // Ya está rotando
+      if (intervalId !== null) return;
       currentIndex = 0;
       intervalId = setInterval(() => {
         img.src = imagenesRotacion[currentIndex];
@@ -214,7 +209,7 @@ function inicializarRotacion() {
       clearInterval(intervalId);
       intervalId = null;
       currentIndex = 0;
-      img.src = imagenesRotacion[0]; // Imagen principal al salir
+      img.src = imagenesRotacion[0];
     }
 
     img.addEventListener("mouseenter", startRotation);
@@ -222,13 +217,10 @@ function inicializarRotacion() {
   });
 }
 
-
 function inicializarColorClick() {
   document.querySelectorAll(".product-colors .color-imagen:not(.estampado-imagen)").forEach(colorImg => {
     colorImg.addEventListener("click", (e) => {
       const card = e.target.closest(".product-card");
-
-      // Limpiar selección previa
       card.querySelectorAll(".color-item, .estampado-item").forEach(item => item.classList.remove("selected"));
       e.target.parentElement.classList.add("selected");
 
@@ -241,8 +233,8 @@ function inicializarColorClick() {
 
       if (!colorSeleccionado || colorSeleccionado.imagenes.length < 2) return;
 
-      mainImg.src = colorSeleccionado.imagenes[1].publicUrl; // Mostrar la segunda imagen
-      const imagenesRotacion = colorSeleccionado.imagenes.slice(2).map(img => img.publicUrl); // Rotar desde la tercera
+      mainImg.src = colorSeleccionado.imagenes[1].publicUrl;
+      const imagenesRotacion = colorSeleccionado.imagenes.slice(2).map(img => img.publicUrl);
       mainImg.dataset.rotacionactiva = JSON.stringify(imagenesRotacion);
       inicializarRotacion();
     });
@@ -253,8 +245,6 @@ function inicializarEstampadoClick() {
   document.querySelectorAll(".product-colors .estampado-imagen").forEach(estampadoImg => {
     estampadoImg.addEventListener("click", (e) => {
       const card = e.target.closest(".product-card");
-
-      // Limpiar selección previa
       card.querySelectorAll(".color-item, .estampado-item").forEach(item => item.classList.remove("selected"));
       e.target.parentElement.classList.add("selected");
 
@@ -267,26 +257,21 @@ function inicializarEstampadoClick() {
 
       if (!estampadoSeleccionado || estampadoSeleccionado.imagenes.length < 2) return;
 
-      mainImg.src = estampadoSeleccionado.imagenes[1].publicUrl; // Mostrar la segunda imagen
-      const imagenesRotacion = estampadoSeleccionado.imagenes.slice(2).map(img => img.publicUrl); // Rotar desde la tercera
+      mainImg.src = estampadoSeleccionado.imagenes[1].publicUrl;
+      const imagenesRotacion = estampadoSeleccionado.imagenes.slice(2).map(img => img.publicUrl);
       mainImg.dataset.rotacionactiva = JSON.stringify(imagenesRotacion);
       inicializarRotacion();
     });
   });
 }
 
-//document.addEventListener("DOMContentLoaded", loadProducts);
-
-// --- Carrusel ---
-
+// Carrusel
 const carouselTrack = document.querySelector(".carousel-track");
 let animationId;
 
 function filtrarCarrusel(arrayBase, arrayFiltro) {
   const referenciasValidas = arrayFiltro.map(item => item.referencia);
-  return arrayBase.filter(item =>
-    referenciasValidas.includes(item.referencia)
-  );
+  return arrayBase.filter(item => referenciasValidas.includes(item.referencia));
 }
 
 function insertarEnCarrusel(carrusel, res) {
@@ -299,17 +284,17 @@ function insertarEnCarrusel(carrusel, res) {
     for (let i = 0; i < res.length; i++) {
       if (res[i].referencia === producto.referencia) {
         if (res[i].tipo === 'colores') {
-          for (let j = 0; j < producto.colores.length; j++) {
-            if (producto.colores[j].codigo === res[i].codigo) {
-              imagenCarrusel = producto.colores[j].imagenes[1].publicUrl;
+          producto.colores.forEach(color => {
+            if (color.codigo === res[i].codigo) {
+              imagenCarrusel = color.imagenes[1].publicUrl;
             }
-          }
+          });
         } else {
-          for (let j = 0; j < producto.estampados.length; j++) {
-            if (producto.estampados[j].codigo === res[i].codigo) {
-              imagenCarrusel = producto.estampados[j].imagenes[1].publicUrl;
+          producto.estampados.forEach(estampado => {
+            if (estampado.codigo === res[i].codigo) {
+              imagenCarrusel = estampado.imagenes[1].publicUrl;
             }
-          }
+          });
         }
       }
     }
@@ -327,7 +312,6 @@ function insertarEnCarrusel(carrusel, res) {
     allCards.push(card);
   });
 
-  // Duplicar para efecto infinito
   allCards.forEach(card => carouselTrack.appendChild(card));
   allCards.forEach(card => carouselTrack.appendChild(card.cloneNode(true)));
 
@@ -336,7 +320,7 @@ function insertarEnCarrusel(carrusel, res) {
 }
 
 function startAutoScroll(originalItemCount) {
-  cancelAnimationFrame(animationId); // Detiene cualquier animación anterior
+  cancelAnimationFrame(animationId);
 
   const items = document.querySelectorAll(".carousel-item");
   if (!items.length) return;
@@ -345,13 +329,13 @@ function startAutoScroll(originalItemCount) {
   const spacing = parseInt(getComputedStyle(items[0]).marginRight || 0);
   const loopWidth = (itemWidth + spacing) * originalItemCount;
 
-  const speed = 3.5; // velocidad aumentada (~150px/s)
+  const speed = 3.5;
   let offset = 0;
 
   function step() {
     offset += speed;
     if (offset >= loopWidth) {
-      offset -= loopWidth; // Reinicia sin salto
+      offset -= loopWidth;
     }
     carouselTrack.style.transform = `translateX(-${offset}px)`;
     animationId = requestAnimationFrame(step);
@@ -360,11 +344,15 @@ function startAutoScroll(originalItemCount) {
   animationId = requestAnimationFrame(step);
 }
 
+// Ejecutar al cargar el DOM
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+});
 
 /**
  * Carga productos y configura filtros por categoría
  */
-document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
   loadProducts();
 
   const botonesCategoria = document.querySelectorAll(".btn-categoria");
