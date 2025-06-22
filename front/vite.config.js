@@ -4,7 +4,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/admin': {
-        target: 'http://localhost:3900',  // tu backend Node
+        target: 'https://back-oki.onrender.com',
         changeOrigin: true,
         secure: false
       }
