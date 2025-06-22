@@ -37,14 +37,36 @@
             </button>
           </div>
           
+<!-- ==================== MODAL DE INICIO DE SESIÓN ==================== -->
+<div class="modal-overlay" id="loginModal" style="display: none;">
+  <div class="login-modal">
 
-          <!-- Modal -->
-          <div id="loginModal" class="modal" style="display: none;">
-            <div class="modal-content">
-              <span id="closeModalBtn" class="close-button">&times;</span>
-              <!-- Aquí va el formulario o contenido del login -->
-            </div>
-          </div>
+    <!-- Botón para cerrar el modal (X arriba a la derecha) -->
+    <button id="closeModalBtn" class="close-modal">&times;</button>
+
+    <!-- Ícono circular del usuario -->
+    <div class="user-icon">
+      <img src="src/Imagen_De_Apoyo/usuario.png" alt="Usuario">
+    </div>
+
+    <!-- Formulario de login -->
+    <form id="loginForm">
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input placeholder="Email ID" id="email" name="email" type="email" required>
+      </div>
+
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input placeholder="Password" id="password" name="password" type="password" required>
+      </div>
+
+      <button class="login-btn" type="submit">INICIAR</button>
+    </form>
+
+  </div>
+</div>
+
 
 
 
@@ -138,26 +160,7 @@
    
 
 
-  <!-- ==================== MODAL DE INICIO DE SESIÓN ==================== -->
- <div class="modal-overlay" id="loginModal" style="display: none;">
-    <div class="login-modal">
-      <!-- Ícono superior del modal -->
-      <div class="user-icon">
-        <img src="src/Imagen_De_Apoyo/usuario.png" alt="Usuario">
-      </div>
 
-      <!-- Formulario de login -->
-      <form id="loginForm">
-        <div class="input-group">
-          <i class="fas fa-user"></i>
-          <input placeholder="Email ID" id="email" name="email" type="email" required>
-        </div>
-        <div class="input-group">
-          <i class="fas fa-lock"></i>
-          <input placeholder="Password" id="password" name="password" type="password" required>
-        </div>
-        <button class="login-btn" type="submit">INICIAR</button>
-      </form>
 
       <!-- Mensaje de error en caso de credenciales inválidas -->
       <div id="errorMsg" class="error" style="display: none; color: red;"></div>
