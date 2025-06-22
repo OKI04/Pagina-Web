@@ -269,12 +269,16 @@
   </div>
 
   <!-- ==================== INCLUSIÓN DE ARCHIVOS JAVASCRIPT ==================== -->
-  <script src="src/js/script.js"></script> <!-- Scripts generales -->
-  <script src="src/js/login.js"></script> <!-- Lógica del login -->
-  <script src="src/js/getProducts.js"></script> <!-- Carga y renderizado de productos -->
-  <script src="src/js/carrito.js"></script> <!-- Funcionalidad del carrito de compras -->
-  <script src="src/js/comprarProducto.js"></script> <!-- Funcionalidad del modal de compra -->
+<!-- Scripts de tu app: usa type="module" -->
+<script type="module" src="src/js/script.js"></script> <!-- Scripts generales -->
+<script type="module" src="src/js/login.js"></script> <!-- Lógica del login -->
+<script type="module" src="src/js/getProducts.js"></script> <!-- Carga y renderizado de productos -->
+<script type="module" src="src/js/carrito.js"></script> <!-- Funcionalidad del carrito de compras -->
+<script type="module" src="src/js/comprarProducto.js"></script> <!-- Funcionalidad del modal de compra -->
+
+<!-- Librerías externas sin módulo (se mantienen igual) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
 </body>
 
