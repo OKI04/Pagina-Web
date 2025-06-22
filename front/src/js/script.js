@@ -24,30 +24,37 @@ function llenarSelect(id, opciones) {
   });
 }
 
-// Modal de inicio de sesión
-function iniciarModalLogin() {
-  const openModalBtn = document.getElementById('openModalBtn');
-  const loginModal = document.getElementById('loginModal');
-  const closeModalBtn = document.getElementById('closeModalBtn');
+document.addEventListener("DOMContentLoaded", () => {
+  // Modal de inicio de sesión
+  function iniciarModalLogin() {
+    const openModalBtn = document.getElementById('openModalBtn');
+    const loginModal = document.getElementById('loginModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
 
-  if (openModalBtn && loginModal && closeModalBtn) {
-    openModalBtn.addEventListener('click', () => {
-      loginModal.style.display = 'flex';
-    });
+    if (openModalBtn && loginModal && closeModalBtn) {
+      // Abrir modal al hacer clic en el botón
+      openModalBtn.addEventListener('click', () => {
+        loginModal.style.display = 'flex';
+      });
 
-    closeModalBtn.addEventListener('click', () => {
-      loginModal.style.display = 'none';
-    });
-
-    window.addEventListener('click', (event) => {
-      if (event.target === loginModal) {
+      // Cerrar modal al hacer clic en el botón de cerrar
+      closeModalBtn.addEventListener('click', () => {
         loginModal.style.display = 'none';
-      }
-    });
-  } else {
-    console.warn("No se encontró uno o más elementos del modal.");
+      });
+
+      // Cerrar modal al hacer clic fuera del contenido
+      window.addEventListener('click', (event) => {
+        if (event.target === loginModal) {
+          loginModal.style.display = 'none';
+        }
+      });
+    } else {
+      console.warn("No se encontró uno o más elementos del modal.");
+    }
   }
-}
+
+  iniciarModalLogin(); // Ejecutar la función cuando el DOM esté listo
+});
 
 // Flechas en scroll de categorías
 function iniciarScrollCategorias() {

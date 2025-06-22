@@ -1,36 +1,22 @@
-// === VARIABLES GLOBALES ===
+// === VARIABLES GLOBALES (Estas ahora son del ámbito del módulo) ===
 let currentImageIndex = 0;
 let productImages = [];
 let colorSeleccionado = null;
 let estampadoSeleccionado = null;
-let count = 0; // <- Aquí la mueves
+let count = 0;
 
+let productosCargados = []; // Se puede setear desde fuera con una función exportada
 
-// === MODALES Y BOTONES ===
-const descripcionModal = document.getElementById('descripcionProducto');
-const btnClose = document.getElementById('btnClose');
-const btnCancelar = document.getElementById('btnCancelar');
-const btnCerrarCompra = document.getElementById('btnCerrarCompra');
-const modalProducto = document.getElementById('modalProducto');
-const prevArrow = document.querySelector('.prev-arrow');
-const nextArrow = document.querySelector('.next-arrow');
+export function setProductosCargados(productos) {
+  productosCargados = productos;
+}
 
-// === EVENTOS PARA CERRAR MODALES ===
-btnClose.onclick = () => descripcionModal.style.display = "none";
-btnCancelar.onclick = () => descripcionModal.style.display = "none";
-btnCerrarCompra.onclick = () => modalProducto.style.display = "none";
-
-window.onclick = (event) => {
-  if (event.target === descripcionModal) descripcionModal.style.display = "none";
-  if (event.target === modalProducto) modalProducto.style.display = "none";
-};
-function AbrirProductoComprarDesdeCarrusel(producto) {
+export function AbrirProductoComprarDesdeCarrusel(producto) {
   if (!producto || !producto.referencia) {
     alert("Producto inválido");
     return;
   }
 
-  // Si productosCargados no tiene este producto, lo agregamos temporalmente
   const yaExiste = productosCargados.some(p => p.referencia === producto.referencia);
   if (!yaExiste) {
     productosCargados.push(producto);
@@ -39,9 +25,22 @@ function AbrirProductoComprarDesdeCarrusel(producto) {
   AbrirProductoComprar(producto.referencia);
 }
 
+export function AbrirDescripcionProducto(referenciaProducto) {
+  const producto = productosCargados.find(p => p.referencia === referenciaProducto);
+  if (!producto) {
+    alert("Producto no encontrado");
+    return;
+  }
 
-// === FUNCIÓN PARA ABRIR MODAL DE COMPRA ===
-function AbrirProductoComprar(referenciaProducto) {
+  const descripcionModal = document.getElementById('descripcionProducto');
+  document.getElementById("nombreProducto").textContent = producto.nombre;
+  document.getElementById("descripcionProductoTexto").textContent = producto.descripcion || "Sin descripción disponible.";
+  if (descripcionModal) {
+    descripcionModal.style.display = "flex";
+  }
+}
+
+export function AbrirProductoComprar(referenciaProducto) {
   const producto = productosCargados.find(p => p.referencia === referenciaProducto);
   if (!producto) {
     alert("Producto no encontrado");
@@ -51,6 +50,7 @@ function AbrirProductoComprar(referenciaProducto) {
   colorSeleccionado = null;
   estampadoSeleccionado = null;
 
+  const modalProducto = document.getElementById('modalProducto');
   document.getElementById("modal-nombre").textContent = producto.nombre;
   document.getElementById("modal-referencia").textContent = producto.referencia;
   document.getElementById("modal-precio").textContent = `$${producto.precio.toLocaleString('es-CO')}`;
@@ -129,35 +129,34 @@ function AbrirProductoComprar(referenciaProducto) {
     contenedorTallas.textContent = "No disponibles";
   }
 
-  // === CANTIDAD ===
   const increment = document.getElementById("increment");
   const decrement = document.getElementById("decrement");
-  const cantidad = document.getElementById("cantidad");
-  let count = 0;
+  const cantidadDisplay = document.getElementById("cantidad");
+  count = 0;
+  if (cantidadDisplay) cantidadDisplay.textContent = count;
 
-  increment.onclick = () => {
+  if (increment) increment.onclick = () => {
     count++;
-    cantidad.textContent = count;
+    cantidadDisplay.textContent = count;
   };
-  decrement.onclick = () => {
+  if (decrement) decrement.onclick = () => {
     if (count > 0) {
       count--;
-      cantidad.textContent = count;
+      cantidadDisplay.textContent = count;
     }
   };
-  cantidad.textContent = count;
 
-  // === DESCRIPCIÓN ===
   const btnOpenDescripcion = document.getElementById('btnOpenDescripcion');
-  btnOpenDescripcion.setAttribute('data-ref', producto.referencia);
-  btnOpenDescripcion.onclick = () => {
-    AbrirDescripcionProducto(producto.referencia);
-  };
+  if (btnOpenDescripcion) {
+    btnOpenDescripcion.setAttribute('data-ref', producto.referencia);
+    btnOpenDescripcion.onclick = () => {
+      AbrirDescripcionProducto(producto.referencia);
+    };
+  }
 
-  modalProducto.style.display = "block";
+  if (modalProducto) modalProducto.style.display = "block";
 }
 
-// === FUNCIÓN PARA CARGAR IMÁGENES SEGÚN SELECCIÓN ===
 function cargarImagenesSegunSeleccion(producto) {
   if (colorSeleccionado?.imagenes?.length > 1) {
     productImages = colorSeleccionado.imagenes.slice(1);
@@ -175,12 +174,11 @@ function cargarImagenesSegunSeleccion(producto) {
   updateMainImageAndThumbnails();
 }
 
-// === MINIATURAS E IMAGEN PRINCIPAL ===
 function updateMainImageAndThumbnails() {
   const imagenPrincipal = document.getElementById("modal-imagen");
   const galeria = document.querySelector(".thumbnail-gallery");
 
-  if (!productImages || productImages.length === 0) return;
+  if (!imagenPrincipal || !galeria || !productImages.length) return;
 
   imagenPrincipal.src = productImages[currentImageIndex].publicUrl;
   galeria.innerHTML = "";
@@ -189,10 +187,7 @@ function updateMainImageAndThumbnails() {
     const thumb = document.createElement("img");
     thumb.src = imgObj.publicUrl;
     thumb.classList.add("thumbnail-img");
-
-    if (currentImageIndex === idx) {
-      thumb.classList.add("selected");
-    }
+    if (currentImageIndex === idx) thumb.classList.add("selected");
 
     thumb.addEventListener("click", () => {
       currentImageIndex = idx;
@@ -204,45 +199,51 @@ function updateMainImageAndThumbnails() {
   });
 }
 
-// === FLECHAS DE NAVEGACIÓN ===
-if (prevArrow) {
-  prevArrow.addEventListener('click', () => {
-    if (productImages.length <= 1) return;
-    currentImageIndex = (currentImageIndex - 1 + productImages.length) % productImages.length;
-    updateMainImageAndThumbnails();
-  });
-}
+// === EVENTOS QUE DEBEN ESPERAR AL DOM ===
+document.addEventListener("DOMContentLoaded", () => {
+  const descripcionModal = document.getElementById('descripcionProducto');
+  const btnClose = document.getElementById('btnClose');
+  const btnCancelar = document.getElementById('btnCancelar');
+  const btnCerrarCompra = document.getElementById('btnCerrarCompra');
+  const modalProducto = document.getElementById('modalProducto');
+  const prevArrow = document.querySelector('.prev-arrow');
+  const nextArrow = document.querySelector('.next-arrow');
 
-if (nextArrow) {
-  nextArrow.addEventListener('click', () => {
-    if (productImages.length <= 1) return;
-    currentImageIndex = (currentImageIndex + 1) % productImages.length;
-    updateMainImageAndThumbnails();
-  });
-}
+  if (btnClose) btnClose.onclick = () => descripcionModal.style.display = "none";
+  if (btnCancelar) btnCancelar.onclick = () => descripcionModal.style.display = "none";
+  if (btnCerrarCompra) btnCerrarCompra.onclick = () => modalProducto.style.display = "none";
 
-// === DESCRIPCIÓN MODAL ===
-function AbrirDescripcionProducto(referenciaProducto) {
-  const producto = productosCargados.find(p => p.referencia === referenciaProducto);
-  if (!producto) {
-    alert("Producto no encontrado");
-    return;
+  window.onclick = (event) => {
+    if (event.target === descripcionModal) descripcionModal.style.display = "none";
+    if (event.target === modalProducto) modalProducto.style.display = "none";
+  };
+
+  if (prevArrow) {
+    prevArrow.addEventListener('click', () => {
+      if (productImages.length <= 1) return;
+      currentImageIndex = (currentImageIndex - 1 + productImages.length) % productImages.length;
+      updateMainImageAndThumbnails();
+    });
   }
 
-  document.getElementById("nombreProducto").textContent = producto.nombre;
-  document.getElementById("descripcionProductoTexto").textContent = producto.descripcion || "Sin descripción disponible.";
-  descripcionModal.style.display = "flex";
-}
-
-
-//==Limpiar el fomulario para seguir comprando==
-document.querySelector(".btnSeguirComprando").addEventListener("click", () => {
-  // Limpiar la talla seleccionada
-  const tallaSeleccionada = document.querySelector(".talla-btn.selected");
-  if (tallaSeleccionada) {
-    tallaSeleccionada.classList.remove("selected");
+  if (nextArrow) {
+    nextArrow.addEventListener('click', () => {
+      if (productImages.length <= 1) return;
+      currentImageIndex = (currentImageIndex + 1) % productImages.length;
+      updateMainImageAndThumbnails();
+    });
   }
 
-  // Reiniciar la cantidad a 1
-  document.getElementById("cantidad").textContent = "0";
+  const btnSeguirComprando = document.querySelector(".btnSeguirComprando");
+  if (btnSeguirComprando) {
+    btnSeguirComprando.addEventListener("click", () => {
+      const tallaSeleccionada = document.querySelector(".talla-btn.selected");
+      if (tallaSeleccionada) tallaSeleccionada.classList.remove("selected");
+      const cantidadDisplay = document.getElementById("cantidad");
+      if (cantidadDisplay) {
+        count = 0;
+        cantidadDisplay.textContent = count;
+      }
+    });
+  }
 });
